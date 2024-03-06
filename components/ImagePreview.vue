@@ -2,8 +2,9 @@
 defineProps<{
     image: File
 }>();
+const emit = defineEmits(['reset']);
 const generateURL = (file: File) => {
-    if (!file) {
+    if (!file || file.type !== 'image/png') {
         return;
     }
 
@@ -17,9 +18,16 @@ const generateURL = (file: File) => {
 </script>
 
 <template>
-    <div>
-        <img :src="generateURL(image)" alt="your image" v-if="image" />
-        <p class="text-gray-400" v-if="image" v-text="image.name" />
+    <div class="relative">
+        <img
+            :src="generateURL(image)"
+            alt="your image"
+            v-if="image"
+            class="rounded-xl border-2 border-gray-400 shadow-2xl"
+        />
+        <div id="remove" @click="emit('reset')">
+            <span>&times;</span>
+        </div>
     </div>
 </template>
 
@@ -29,5 +37,15 @@ img {
     max-height: 80vh;
     width: auto;
     height: auto;
+}
+
+#remove {
+    @apply absolute top-1 right-1;
+    @apply w-6 h-6;
+    @apply flex justify-center items-center;
+    @apply bg-white;
+    @apply rounded-full border border-black;
+    @apply cursor-pointer;
+    line-height: 0;
 }
 </style>
