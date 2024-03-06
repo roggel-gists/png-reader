@@ -5,7 +5,6 @@ const props = defineProps<{
     image: File
 }>();
 const tags = ref<Tags | []>();
-const prompts = ref<String[] | []>();
 const positivePrompts = ref<String[] | []>([]);
 const negativePrompts = ref<String[] | []>([]);
 const promptObject = ref<any>();
@@ -35,6 +34,9 @@ const findPositives = (type: string) => {
         }
     }).filter(val => !!val);
 }
+onMounted(() => {
+  parseTags();
+});
 
 watch(
     () => props.image,
