@@ -7,18 +7,32 @@ const props = defineProps<{
 const tags = ref<Tags | []>();
 const positivePrompts = ref<String[] | []>([]);
 const negativePrompts = ref<String[] | []>([]);
+const details = reactive({});
 const promptObject = ref<any>();
 
 const parseTags = async () => {
     positivePrompts.value = [];
     negativePrompts.value = [];
+    Object.keys(details).forEach(key => delete details[key]);
+    promptObject.value = {};
 
     tags.value = await ExifReader.load(props.image, {includeUnknown: true});
-    // ComfyUI
     if (tags.value.prompt) {
+        // ComfyUI
         promptObject.value = JSON.parse(tags.value.prompt.value);
         positivePrompts.value = findPositives('positive');
         negativePrompts.value = findPositives('negative');
+    } else if (tags.value.parameters) {
+        // Automatic 1111
+        const params = tags.value.parameters.value;
+        const [prompts, rest] = params.split('Steps: ', 2);
+        const [positivePrompt, negativePrompt] = prompts.split('Negative prompt: ', 2);
+        positivePrompts.value = [positivePrompt];
+        negativePrompts.value = [negativePrompt];
+        ('Steps: ' + rest).split(', ').forEach((pair) => {
+            const [key, value] = pair.split(': ');
+            details[key] = value.trim();
+        })
     }
 };
 
@@ -35,7 +49,7 @@ const findPositives = (type: string) => {
     }).filter(val => !!val);
 }
 onMounted(() => {
-  parseTags();
+    parseTags();
 });
 
 watch(
@@ -54,12 +68,22 @@ watch(
         <p
             v-for="(prompt, index) in positivePrompts"
             :key="index" v-text="prompt"
-            class="bg-green-500/10 p-4 border border-green-950 rounded-lg text-gray-300 mb-4"
+            class="bg-green-500/10 p-4 border border-green-950 rounded-lg text-gray-300 mb-4 whitespace-pre-line"
         />
         <p
             v-for="(prompt, index) in negativePrompts"
-            :key="index" v-text="prompt"
-            class="bg-red-500/10 p-4 border border-red-950 rounded-lg text-gray-300 mb-4"
+            :key="index"
+            v-if="negativePrompts"
+            v-text="prompt"
+            class="bg-red-500/10 p-4 border border-red-950 rounded-lg text-gray-300 mb-4 whitespace-pre-line"
         />
+        <div v-if="details" class="bg-gray-700 p-4 border border-gray-900 rounded-lg text-gray-300 mb-4">
+            <table>
+                <tr v-for="(value, key) in details" :index="key">
+                    <td>{{ key }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+            </table>
+        </div>
     </div>
 </template>
