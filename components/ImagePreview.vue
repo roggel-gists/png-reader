@@ -23,7 +23,7 @@ const generateURL = (file: File) => {
             :src="generateURL(image)"
             alt="your image"
             v-if="image"
-            class="rounded-xl border-2 border-gray-400 shadow-2xl"
+            class="rounded-xl border-2 border-gray-600 shadow-2xl"
         />
         <div id="remove" @click="emit('reset')">
             <span>&times;</span>
@@ -33,19 +33,17 @@ const generateURL = (file: File) => {
 
 <style scoped>
 img {
-    max-width: 40vw;
-    max-height: 80vh;
-    width: auto;
-    height: auto;
+    @apply max-w-[40vw] max-h-[80vh];
+    @apply w-auto h-auto;
 }
 
 #remove {
+    @apply font-bold;
     @apply absolute top-1 right-1;
     @apply w-6 h-6;
     @apply flex justify-center items-center;
-    @apply bg-white;
-    @apply rounded-full border border-black;
+    @apply bg-white/50 hover:bg-white transition-colors;
+    @apply rounded-full border-2 border-gray-500 hover:border-gray-800;
     @apply cursor-pointer;
-    line-height: 0;
 }
 </style>
